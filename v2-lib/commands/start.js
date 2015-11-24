@@ -4,7 +4,8 @@ var Command = require('./command'),
     Response = require('../response'),
     IonicAppLib = require('ionic-app-lib'),
     Start = IonicAppLib.v2.start,
-    Q = require('q');
+    Q = require('q'),
+    path = require('path');
 
 module.exports = StartCommand;
 
@@ -43,9 +44,7 @@ StartCommand.prototype.run = function(){
     return Start.promptLogin(options);
   })
   .then(function() {
-    if (isV2Start) {
-      return new Response('New to Ionic? Get started here: http://ionicframework.com/docs/v2/getting-started');
-    }
+    return new Response('New to Ionic? Get started here: http://ionicframework.com/docs/v2/getting-started');
   })
   .catch(function(error) {
     throw error;
@@ -56,8 +55,9 @@ StartCommand.prototype.buildOptions = function(){
   var options = {};
 
   // Grab the app's relative directory name
-  options.projectDir = argv._[1];
-  options.projectPath = path.resolve(options.appDirectory);
+  options.projectDir = this.argv._[1];
+  options.projectPath = path.resolve(options.projectDir);
+  options.template = this.argv._[2];
 
   return options;
 }

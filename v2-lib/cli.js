@@ -4,6 +4,9 @@ var Response = require('./response'),
     Q = require('q'),
     optimist = require('optimist');
 
+//TODO lazy-load
+var CommandNotFoundError = require('./errors/command-not-found');
+
 module.exports = Cli;
 
 function Cli(options){
@@ -21,7 +24,9 @@ Cli.prototype.run = function() {
   })
   .catch(function(error) {
     self.handleError(error);
-    throw error
+    if (error instanceof CommandNotFoundError) {
+      throw error
+    }
   });
 }
 
