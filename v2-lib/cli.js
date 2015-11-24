@@ -1,6 +1,7 @@
 'use strict'
 
-var Q = require('q'),
+var Response = require('./response'),
+    Q = require('q'),
     optimist = require('optimist');
 
 module.exports = Cli;
@@ -8,19 +9,18 @@ module.exports = Cli;
 function Cli(options){
   this.argv = options.argv;
   this.command = this.argv._[0];
+  this.verbose = this.argv.verbose || this.argv.v;
 }
 
 Cli.prototype.run = function() {
-  //run command
-  return this.runCommand()
+  var self = this;
+
+  return self.runCommand()
   .then(function(response){
-    console.log('cli run success')
-    //process success response appropriately
+    self.handleResponse(response);
   })
   .catch(function(error) {
-    // process error appropriately
-    console.log('cli run error')
-    console.log(error.stack)
+    self.handleError(error);
     throw error
   });
 }
@@ -33,7 +33,6 @@ Cli.prototype.runCommand = function() {
     return command.run();
   })
   .catch(function(error){
-    //construct error if it's not already typeof Response
     console.log('error in runCommand');
     throw error;
   });
@@ -46,3 +45,15 @@ Cli.prototype.lookupCommand = function() {
     argv: this.argv
   });
 }
+
+Cli.prototype.handleResponse = function(response) {
+  console.log('cli run success');
+}
+
+Cli.prototype.handleError = function(error) {
+  console.log('cli run error');
+  if (this.verbose) {
+    console.log(error.stack)
+  }
+}
+
