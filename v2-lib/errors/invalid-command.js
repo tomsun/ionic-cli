@@ -1,4 +1,4 @@
-var IonicError - require('ionic-error');
+var IonicError = require('./ionic-error');
 
 module.exports = InvalidCommandError;
 

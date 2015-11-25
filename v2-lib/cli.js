@@ -4,8 +4,9 @@ var Response = require('./response'),
     Q = require('q'),
     optimist = require('optimist');
 
-//TODO lazy-load
-var CommandNotFoundError = require('./errors/command-not-found');
+//TODO lazy-load?
+var IonicError = require('./errors/ionic-error'),
+    CommandNotFoundError = require('./errors/command-not-found');
 
 module.exports = Cli;
 
@@ -28,7 +29,7 @@ Cli.prototype.run = function() {
   .catch(function(error) {
     self.handleError(error);
     if (error instanceof CommandNotFoundError) {
-      console.log('what?');
+      console.log("command " + this.command + " not found")
       throw error
     }
   });
@@ -49,6 +50,7 @@ Cli.prototype.runCommand = function() {
 
 Cli.prototype.lookupCommand = function() {
   console.log("looking up command: " + this.command);
+  debugger
 
   try {
     var CommandType = require('./commands/' + this.command);
@@ -67,10 +69,14 @@ Cli.prototype.handleResponse = function(response) {
 }
 
 Cli.prototype.handleError = function(error) {
+  if (!(error instanceof IonicError)) {
+    //Legit error, should exit and error
+  }
 
   if (error instanceof CommandNotFoundError) {
     console.log('Command ' + this.command + ' not found.');
   }
+
   //TODO
   console.log('cli run error');
   if (this.verbose) {
