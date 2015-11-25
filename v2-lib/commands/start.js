@@ -2,6 +2,8 @@
 
 var Command = require('./command'),
     Response = require('../response'),
+    CommandNotFoundError = require('../errors/command-not-found'),
+    InvalidCommandError = require('../errors/invalid-command'),
     IonicAppLib = require('ionic-app-lib'),
     Start = IonicAppLib.v2.start,
     Q = require('q'),
@@ -11,16 +13,29 @@ module.exports = StartCommand;
 
 function StartCommand(options){
   Command.call(this, options);
-  this.name = "start";
-  this.description = "The start command";
 
-  //TODO options array
+  // For now, start requires v2 flag
+  var argv = this.argv;
+  if (!argv.v2) {
+    throw new CommandNotFoundError();
+  }
+  if (argv._.length < 2) {
+    // TODO print help in handler
+    throw new InvalidCommandError('Not enough arguments to start!');
+  }
+  if (argv._[1] == '.' || argv._[1] == '..') {
+    throw new InvalidCommandError(argv._[1] + ' is not a valid app name');
+  }
 }
 
 StartCommand.prototype = Object.create(Command.prototype);
 
+StartCommand.prototype.name = "start";
+StartCommand.prototype.description = "The start command";
+StartCommand.prototype.args = ['[options]', '<app-name>', '[template]'];
+StartCommand.prototype.optDescriptions = {}
+
 StartCommand.prototype.run = function(){
-  this.validate();
   var options = this.buildOptions();
 
   var promptPromise;
@@ -33,7 +48,7 @@ StartCommand.prototype.run = function(){
   return promptPromise
   .then(function(promptToContinue) {
     if (!promptToContinue) {
-      throw new Error('Ionic start cancelled by user.');// TODO add error type
+      throw new Response('Ionic start cancelled by user.');
     }
     return Start.startApp(options);
   })
@@ -60,18 +75,6 @@ StartCommand.prototype.buildOptions = function(){
   options.template = this.argv._[2];
 
   return options;
-}
-
-StartCommand.prototype.validate = function() {
-  var argv = this.argv;
-  if (argv._.length < 2) {
-    // TODO type invalid command, print help
-    throw new Error('Start command is invalid');
-  }
-
-  if (argv._[1] == '.') {
-    throw new Error('Please name your Ionic project something meaningful other than \'.\'');
-  }
 }
 
 function existsSync(fp) {

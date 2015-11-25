@@ -12,10 +12,3 @@ function Command(options) {
 Command.prototype.run = function() {
   throw new Error("Command should implement run");
 }
-
-/**
- * Returns an options object for the command
- */
-Command.prototype.buildOptions = function() {
-  throw new Error("Command should implement buildOptions");
-}

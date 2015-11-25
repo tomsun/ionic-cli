@@ -11,12 +11,15 @@ module.exports = Cli;
 
 function Cli(options){
   this.argv = options.argv;
-  this.command = this.argv._[0];
+  this.command = this.argv._[0] || 'help';
   this.verbose = this.argv.verbose || this.argv.v;
 }
 
 Cli.prototype.run = function() {
   var self = this;
+
+  //TODO cd to root
+  //TODO hooks
 
   return self.runCommand()
   .then(function(response){
@@ -25,6 +28,7 @@ Cli.prototype.run = function() {
   .catch(function(error) {
     self.handleError(error);
     if (error instanceof CommandNotFoundError) {
+      console.log('what?');
       throw error
     }
   });
@@ -45,20 +49,31 @@ Cli.prototype.runCommand = function() {
 
 Cli.prototype.lookupCommand = function() {
   console.log("looking up command: " + this.command);
-  var CommandType = require('./commands/' + this.command);
+
+  try {
+    var CommandType = require('./commands/' + this.command);
+  } catch (e) {
+    throw new CommandNotFoundError();
+  }
+
   return new CommandType({
     argv: this.argv
   });
 }
 
 Cli.prototype.handleResponse = function(response) {
+  //TODO
   console.log('cli run success');
 }
 
 Cli.prototype.handleError = function(error) {
+
+  if (error instanceof CommandNotFoundError) {
+    console.log('Command ' + this.command + ' not found.');
+  }
+  //TODO
   console.log('cli run error');
   if (this.verbose) {
     console.log(error.stack)
   }
 }
-
