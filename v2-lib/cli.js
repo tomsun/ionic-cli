@@ -2,7 +2,8 @@
 
 var Response = require('./response'),
     Q = require('q'),
-    optimist = require('optimist');
+    optimist = require('optimist'),
+    colors = require('colors');
 
 //TODO lazy-load?
 var IonicError = require('./errors/ionic-error'),
